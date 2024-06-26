@@ -24,7 +24,7 @@ steps:
 - task: Docker@2
   inputs:
     containerRegistry: 'DockerHub'
-    repository: 'amirarefi/carswebapp'
+    repository: '[amirarefi/carswebapp]'
     command: 'build'
     Dockerfile: '**/Dockerfile'
   displayName: DockerBuild  
@@ -50,7 +50,7 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az account set --subscription fe719b2f-40fb-4f37-aa3a-3895f214fede
+      az account set --subscription [subscriptionID]
       az aks get-credentials --resource-group Kubernetes-test --name my-test-cluster --overwrite-existing
       kubectl get deployments --all-namespaces=true
   displayName: ConnectToAKS
