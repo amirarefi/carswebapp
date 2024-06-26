@@ -1,0 +1,16 @@
+{>"layout" /}
+
+{<body}
+    {#cars}
+        <div class="card card-body">
+            <h4>{name}<button class="btn btn-primary float-right" data-toggle="collapse" href="#cars_{id}" role="button" aria-expanded="false" aria-controls="cars_{id}">View</button></h4>
+            <div class="collapse" id="cars_{id}">
+                <br/>
+                <p><strong>Specs: </strong>{specs}</p>
+                <img src="{photo}" class="rounded img-fluid">
+                <br/>
+                <p><strong>Finance: </strong>{finance}</p>
+            </div>
+        </div>  
+    {/cars}
+{/body}

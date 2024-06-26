@@ -1,0 +1,63 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: DockerInstaller@0
+  inputs:
+    dockerVersion: '17.09.0-ce'
+  displayName: InstallDocker  
+  enabled: true
+
+- task: CmdLine@2
+  inputs:
+    script: |
+      sudo apt-get install rpm
+      wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb
+      sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
+      trivy -v
+  displayName: InstallTrivy   
+  enabled: true
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DockerHub'
+    repository: 'amirarefi/carswebapp'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+  displayName: DockerBuild  
+  enabled: true
+
+- task: CmdLine@2
+  inputs:
+    script: 'trivy image --exit-code 1 --severity HIGH,CRITICAL  amirarefi/carswebapp:$(Build.BuildId)'
+  displayName: TrivyScan  
+  enabled: true
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DockerHub'
+    repository: 'amirarefi/carswebapp'
+    command: 'push'
+  displayName: DockerPush  
+  enabled: true  
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'Azure subscription 1'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az account set --subscription fe719b2f-40fb-4f37-aa3a-3895f214fede
+      az aks get-credentials --resource-group Kubernetes-test --name my-test-cluster --overwrite-existing
+      kubectl get deployments --all-namespaces=true
+  displayName: ConnectToAKS
+  enabled: true   
+
+- task: CmdLine@2
+  inputs:
+    script: 'kubectl create deployment carswebapp --image=docker.io/amirarefi/carswebapp:$(Build.BuildId) --replicas=3 -n app'
+  displayName: DeploytoAKSCluster
+  enabled: true
